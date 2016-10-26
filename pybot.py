@@ -26,6 +26,8 @@ class PyBot:
         with open("/etc/pybot/pybot.conf", "r") as configfile:
             pass
 
+
+
         self.loop()
 
     def loop(self):
