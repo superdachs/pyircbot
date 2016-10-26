@@ -7,13 +7,49 @@ from time import sleep
 import signal
 import irc
 from irc import client
+import threading
 
 class PyBot:
 
+    class Connection:
+
+        def __init__(self, server, port, nick, channels, private_message_handler):
+            self.reactor = irc.client.Reactor()
+            self.c = self.reactor.server().connect(server, port, nick)
+            self.channels = channels
+
+            self.c.add_global_handler("welcome", self.on_connect)
+            self.c.add_global_handler("privmsg", private_message_handler)
+
+            
+
+            self.thread = threading.Thread(target=self.reactor.process_forever)
+            self.thread.start()
+
+        def on_connect(self, connection, event):
+            print("connected")
+            for channel in self.channels:
+                print("joining %s" % channel)
+                connection.join(channel)
+
     def __init__(self):
         self.terminate = False
+
+        self.connections = []
+
         signal.signal(signal.SIGTERM, self.cleanup)
         signal.signal(signal.SIGQUIT, self.cleanup)
+
+    def private_message_handler(self, connection, event):
+        self.send_private_message(connection, event.source.split("!")[0], self.compute_answer(event.arguments[0]))
+
+    def send_private_message(self, connection, nick, text):
+        connection.privmsg(nick, text)
+
+    def compute_answer(self, text):
+        answer = "Ich hab keine Ahnung was du von mir willst!"
+        #TODO: use google for answer
+        return answer
 
     def terminate(self):
         self.terminate = True
@@ -28,37 +64,14 @@ class PyBot:
         with open("/etc/pybot/pybot.conf", "r") as configfile:
             pass
 
+        con = self.Connection("192.168.16.61", 6667, "PyBotDev", ["#Dachsbau", "#Holda"], self.private_message_handler)
 
-        # testcode
-        # TODO: build up structure holding connection to multiple servers
-        #       and add handlers
-
-        server = "192.168.16.61"
-        port = 6667
-        nick = "PyBotDev"
-
-        reactor = irc.client.Reactor()
-
-        c = reactor.server().connect(server, port, nick)
-        def on_connect(connection, event):
-            connection.join("#Dachsbau")
-
-        def on_message(connection, event):
-            print(event)
-
-        c.add_global_handler("welcome", on_connect)
-        c.add_global_handler("message", on_message)
-
-        reactor.process_forever()
-
-        # end of testcode
 
         self.loop()
 
     def loop(self):
         print("entering main loop")
         while not self.terminate:
-            print("beep")
             sleep(1)
         self.cleanup()
 
