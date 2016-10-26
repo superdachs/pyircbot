@@ -43,8 +43,12 @@ class PyBot:
         def on_connect(connection, event):
             connection.join("#Dachsbau")
 
+        def on_message(connection, event):
+            print(event)
+
         c.add_global_handler("welcome", on_connect)
-        
+        c.add_global_handler("message", on_message)
+
         reactor.process_forever()
 
         # end of testcode
