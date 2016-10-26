@@ -13,18 +13,18 @@ class PyBot:
 
     class Connection:
 
-        def __init__(self, server, port, nick, channels, private_message_handler):
+        def __init__(self, server, port, nick, channels, private_message_handler, public_message_handler):
             self.reactor = irc.client.Reactor()
             self.c = self.reactor.server().connect(server, port, nick)
             self.channels = channels
 
             self.c.add_global_handler("welcome", self.on_connect)
             self.c.add_global_handler("privmsg", private_message_handler)
-
+            self.c.add_global_handler("pubmsg", public_message_handler)
             
-
             self.thread = threading.Thread(target=self.reactor.process_forever)
             self.thread.start()
+
 
         def on_connect(self, connection, event):
             print("connected")
@@ -43,11 +43,14 @@ class PyBot:
     def private_message_handler(self, connection, event):
         self.send_private_message(connection, event.source.split("!")[0], self.compute_answer(event.arguments[0]))
 
+    def public_message_handler(self, connection, event):
+        print(event)
+
     def send_private_message(self, connection, nick, text):
         connection.privmsg(nick, text)
 
     def compute_answer(self, text):
-        answer = "Ich hab keine Ahnung was du von mir willst!"
+        answer = "Ich hab keine Ahnung was du von mir willst!öäü"
         #TODO: use google for answer
         return answer
 
@@ -64,7 +67,7 @@ class PyBot:
         with open("/etc/pybot/pybot.conf", "r") as configfile:
             pass
 
-        con = self.Connection("192.168.16.61", 6667, "PyBotDev", ["#Dachsbau", "#Holda"], self.private_message_handler)
+        con = self.Connection("192.168.16.61", 6667, "PyBotDev", ["#Dachsbau", "#Holda"], self.private_message_handler, self.public_message_handler)
 
 
         self.loop()
