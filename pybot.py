@@ -4,12 +4,22 @@ import daemonize
 import sys
 import os
 from time import sleep
+import signal
 
 class PyBot:
 
     def __init__(self):
         self.terminate = False
-        pass
+        signal.signal(signal.SIGTERM, self.cleanup)
+        signal.signal(signal.SIGQUIT, self.cleanup)
+
+    def terminate(self):
+        self.terminate = True
+
+    def cleanup(self, *args, **kwargs):
+        print("cleaning up.")
+        # do stuff
+        os._exit(0)        
 
     def main(self):
         
@@ -23,6 +33,7 @@ class PyBot:
         while not self.terminate:
             print("beep")
             sleep(1)
+        self.cleanup()
 
 if __name__ == "__main__":
    
@@ -49,6 +60,7 @@ if __name__ == "__main__":
         start()
 
     def foreground():
+        print("starting in foreground")
         PyBot().main()
 
     try:
