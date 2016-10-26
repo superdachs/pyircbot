@@ -5,6 +5,8 @@ import sys
 import os
 from time import sleep
 import signal
+import irc
+from irc import client
 
 class PyBot:
 
@@ -27,6 +29,25 @@ class PyBot:
             pass
 
 
+        # testcode
+        # TODO: build up structure holding connection to multiple servers
+        #       and add handlers
+
+        server = "192.168.16.61"
+        port = 6667
+        nick = "PyBotDev"
+
+        reactor = irc.client.Reactor()
+
+        c = reactor.server().connect(server, port, nick)
+        def on_connect(connection, event):
+            connection.join("#Dachsbau")
+
+        c.add_global_handler("welcome", on_connect)
+        
+        reactor.process_forever()
+
+        # end of testcode
 
         self.loop()
 

@@ -1,5 +1,6 @@
 daemonize==2.4.7
 inflect==0.2.5
+irc==15.0.3
 jaraco.classes==1.4
 jaraco.collections==1.5
 jaraco.functools==1.15.1
