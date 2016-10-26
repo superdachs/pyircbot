@@ -1,0 +1,3 @@
+daemonize==2.4.7
+PyIRC==3.0b1
+taillight==0.3b3
